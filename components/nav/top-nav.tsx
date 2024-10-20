@@ -20,6 +20,8 @@ import {
     Handshake,
   } from "lucide-react";
 import { currentUser } from "@clerk/nextjs/server";
+import { Toaster } from "react-hot-toast";
+import AddBusinessButton from "../buttons/add-business-button";
 
 export default async function TopNav() {
     // hooks
@@ -43,17 +45,7 @@ export default async function TopNav() {
             </div>
 
             <div className="flex flex-grow items-center justify-end gap-1">
-            <MenubarMenu>
-                <MenubarTrigger className="text-base font-normal">
-                    <Link href="/business/add">
-                        <span className="flex items-center">
-                            <Plus size={16} className="mr-2" />
-                            <span>Add Business</span>
-                        </span>
-                    </Link>
-                </MenubarTrigger>
-            </MenubarMenu>
-
+            <AddBusinessButton />
             {user && (
                 <MenubarMenu>
                     <MenubarTrigger className="text-base font-normal">
@@ -78,7 +70,8 @@ export default async function TopNav() {
             <MenubarMenu>
                 <ModeToggle />                
             </MenubarMenu>
-            </div>          
-            </Menubar>
+            </div>
+            <Toaster />
+        </Menubar>
     );
 }

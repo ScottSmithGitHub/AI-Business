@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/context/theme";
 import TopNav from "@/components/nav/top-nav";
 import { ClerkProvider } from "@clerk/nextjs";
+import { BusinessProvider } from "@/context/business";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -37,8 +38,10 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange>
-              <TopNav />
-              {children}
+              <BusinessProvider>
+                <TopNav />
+                {children}
+              </BusinessProvider>
           </ThemeProvider>
         </body>
       </html>
