@@ -11,6 +11,7 @@ import React, {
   import { BusinessState } from "@/utils/types/business";
   import { useClerk, useUser } from "@clerk/nextjs";
   import { saveBusinessToDb,getBusinessFromDb, getUserBusinessesFromDb } from "@/actions/business";
+  import {handleLogoAction} from "@/actions/coudinary";
   import toast from "react-hot-toast";
   import { useRouter, usePathname, useParams } from "next/navigation";
 
@@ -43,6 +44,7 @@ import React, {
     businesses: BusinessState[];
     setBusinesses: React.Dispatch<React.SetStateAction<BusinessState[]>>;
     initialState: BusinessState;
+    logoUploading: boolean;
    };
 
   const BusinessContext = createContext<BusinessContextType | undefined>(
@@ -56,6 +58,9 @@ import React, {
     const [business, setBusiness] = useState<BusinessState>(initialState);
     const [loading, setLoading] = useState<boolean>(false);
     const [businesses, setBusinesses] = useState<BusinessState[]>([]);
+
+    // loading state
+    const [logoUploading, setLogoUploading] = useState<boolean>(false);
 
     // hooks
     const { openSignIn } = useClerk();
@@ -105,7 +110,48 @@ import React, {
     };
 
     const handleLogo = async (files: FileList, name: string) => {
-      // upload image to cludinary
+      const file = files[0];
+      setLogoUploading(true);
+  
+      // convert image to base64
+      const reader = new FileReader();
+  
+      return new Promise<void>((resolve, reject) => {
+        reader.onloadend = async () => {
+          const base64Image = reader.result as string;
+  
+          try {
+            const imageUrl = await handleLogoAction(base64Image);
+  
+            if (imageUrl) {
+              setBusiness((prevBusiness) => {
+                const updatedBusiness = { ...prevBusiness, [name]: imageUrl };
+  
+                // save to local storage
+                localStorage.setItem("business", JSON.stringify(updatedBusiness));
+  
+                return updatedBusiness;
+              });
+  
+              resolve();
+            } else {
+              toast.error("❌ Failed to upload logo");
+            }
+          } catch (err: any) {
+            console.error(err);
+            toast.error("❌ Failed to upload logo");
+          } finally {
+            setLogoUploading(false);
+          }
+        };
+  
+        reader.onerror = (error) => {
+          toast.error("❌ Failed to upload image");
+          reject(error);
+        };
+  
+        reader.readAsDataURL(file);
+      });
 
     };
 
@@ -170,7 +216,8 @@ import React, {
             handleSubmit,
             businesses,
             setBusinesses,
-            initialState
+            initialState,
+            logoUploading
           }}
         >
           {children}
